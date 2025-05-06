@@ -1,100 +1,109 @@
-// Importamos React y el hook useState para manejar estado
+// Importamos React y useState
 import React, { useState } from 'react';
 
 // Importamos componentes nativos desde React Native
 import {
-  View,           // Contenedor general
-  FlatList,       // Lista optimizada para muchos elementos
-  Text,           // Texto en pantalla
-  StyleSheet,     // Estilos en formato JS
-  SafeAreaView,   // Evita que el contenido se superponga con la barra superior
-  Button,         // Botón básico nativo
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  Image
 } from 'react-native';
 
-// Definimos el tipo de dato "Usuario" usando TypeScript
-type Usuario = {
-  id: string;
-  nombre: string;
-  email: string;
-  ciudad: string;
-};
-
-// Creamos una lista de usuarios fija (simulada, como si viniera de una API)
-const USUARIOS: Usuario[] = [
-  { id: '1', nombre: 'Ana', email: 'ana@mail.com', ciudad: 'Bogotá' },
-  { id: '2', nombre: 'Luis', email: 'luis@mail.com', ciudad: 'Medellín' },
-  { id: '3', nombre: 'Carlos', email: 'carlos@mail.com', ciudad: 'Cali' },
-];
-
-// Componente principal de la aplicación
 const App = () => {
-  // Estado local que guarda el ID del usuario que tiene los detalles abiertos
-  const [verDetalles, setVerDetalles] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
+  const [tocado, setTocado] = useState(false);
+
+  // Validación muy simple: que tenga @ y .com
+  const esValido = email.includes('@') && email.endsWith('.com');
+  const mostrarError = tocado && !esValido && email.length > 0;
 
   return (
-    // SafeAreaView protege el contenido de la barra de estado
-    <SafeAreaView style={styles.container}>
-      {/* Título principal de la app */}
-      <Text style={styles.titulo}>Directorio de Usuarios</Text>
+    <SafeAreaView style={styles.contenedor}>
+      <Text style={styles.titulo}>Introduce your e-mail</Text>
 
-      {/* FlatList recorre la lista y renderiza cada usuario */}
-      <FlatList
-        data={USUARIOS} // Lista de usuarios
-        keyExtractor={(item) => item.id} // Clave única por cada usuario
-        renderItem={({ item }) => (
-          <View style={styles.item}>
-            {/* Mostramos el nombre del usuario */}
-            <Text style={styles.nombre}>{item.nombre}</Text>
+      {/* Etiqueta de correo */}
+      <Text style={[styles.etiqueta, mostrarError && styles.etiquetaError]}>
+        {mostrarError ? 'Correo electrónico incorrecto' : 'Correo electrónico'}
+      </Text>
 
-            {/* Botón que alterna entre mostrar y ocultar detalles */}
-            <Button
-              title={verDetalles === item.id ? 'Ocultar' : 'Ver más'}
-              onPress={() =>
-                setVerDetalles(verDetalles === item.id ? null : item.id)
-              }
+      {/* Caja de entrada */}
+      <View style={[styles.caja, mostrarError ? styles.cajaError : styles.cajaNormal]}>
+        <TextInput
+          style={[styles.input, mostrarError && styles.inputError]}
+          placeholder="Escribe tu correo electrónico"
+          placeholderTextColor="#777"
+          value={email}
+          onChangeText={setEmail}
+          onBlur={() => setTocado(true)}
+        />
+
+        {/* Botón X para limpiar */}
+        {email.length > 0 && (
+          <TouchableOpacity onPress={() => setEmail('')}>
+            <Image
+              source={require('./assets/close-icon.png')}
+              style={styles.icono}
             />
-
-            {/* Si este usuario está seleccionado, mostramos los detalles */}
-            {verDetalles === item.id && (
-              <View style={styles.detalles}>
-                <Text>Email: {item.email}</Text>
-                <Text>Ciudad: {item.ciudad}</Text>
-              </View>
-            )}
-          </View>
+          </TouchableOpacity>
         )}
-      />
+      </View>
     </SafeAreaView>
   );
 };
 
-// Estilos para la aplicación
+// Estilos sencillos pero similares a Figma
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,                    // Usa todo el alto de la pantalla
-    paddingHorizontal: 16,     // Margen a los lados
-    paddingTop: 60,            // ⬅️ Espacio superior más amplio
-    backgroundColor: '#fff',   // Fondo blanco para mejor visualización
+  contenedor: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
   },
   titulo: {
-    fontSize: 24,              // Tamaño de letra grande
-    fontWeight: 'bold',        // Texto en negrita
-    marginBottom: 16,          // Espacio debajo del título
+    fontSize: 16,
+    marginBottom: 10,
+    color: '#7871FF',
   },
-  item: {
-    backgroundColor: '#eee',   // Fondo gris claro
-    padding: 12,               // Relleno interno
-    marginBottom: 10,          // Espacio entre cada usuario
-    borderRadius: 8,           // Bordes redondeados
+  etiqueta: {
+    fontSize: 14,
+    color: '#A0A0A0',
+    marginBottom: 4,
   },
-  nombre: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  etiquetaError: {
+    color: '#B4444B',
   },
-  detalles: {
-    marginTop: 8,              // Espacio arriba de los detalles
+  caja: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 15,
+    height: 60,
+    paddingHorizontal: 15,
+    borderWidth: 1.5,
+  },
+  cajaNormal: {
+    backgroundColor: '#141534',
+    borderColor: '#7871FF',
+  },
+  cajaError: {
+    backgroundColor: '#FBEAEA',
+    borderColor: '#B4444B',
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: '#fff',
+  },
+  inputError: {
+    color: '#B4444B',
+  },
+  icono: {
+    width: 25,
+    height: 25,
+    tintColor: '#fff',
   },
 });
 
-// Exportamos el componente principal
 export default App;
